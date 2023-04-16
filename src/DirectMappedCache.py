@@ -18,7 +18,11 @@ class DirectMappedCache(Cache):
             curLine = self.addLeadingZeros(binaryStr[self.tagWidth:self.tagWidth + self.lineWidth])
             curOffset = self.addLeadingZeros(binaryStr[self.tagWidth + self.lineWidth:])
             
-            itemLine = list(self.hexBinConvMap.values()).index(curLine)
+            itemLine = ''
+            if curLine in list(self.hexBinConvMap.values()):
+                itemLine = list(self.hexBinConvMap.values()).index(curLine)
+            else:
+                itemLine = self.binaryToHex(curLine)
             if self.cacheStruct[itemLine]['tag'] == curTag:
                 self.hits += 1
             else:

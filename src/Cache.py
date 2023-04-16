@@ -31,6 +31,14 @@ class Cache:
         'e': '1110',
         'f': '1111'
     }
+    hexDecConvMap = {
+        'a': 10,
+        'b': 11,
+        'c': 12,
+        'd': 13,
+        'e': 14,
+        'f': 15
+    }
 
     def __init__(self):
         self.totalSize = input('Enter total number of bytes to be stored in the cache. Use a power of 2: ')
@@ -74,6 +82,26 @@ class Cache:
         while len(newStr) % 4 != 0:
             newStr = '0' + newStr
         return newStr
+
+    def binaryToHex(self, inputStr):
+        outputVal = 0
+        newStr = ''
+        iters = 0
+        for char in inputStr:
+            if len(newStr) != 4:
+                newStr += char
+            else:
+                hexChar = list(self.hexBinConvMap.values()).index(newStr)
+                decInt = 0
+                if hexChar not in self.hexDecConvMap:
+                    decInt = int(hexChar)
+                else:
+                    decInt = self.hexDecConvMap[hexChar]
+                outputVal += decInt * (10**iters)
+                iters += 1
+                newStr = ''
+
+        return outputVal
 
     def simulate(self, addrs):
         pass
