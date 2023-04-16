@@ -43,7 +43,7 @@ class SetAssociativeCache(Cache):
             itemFound = False
             lineIter = self.linesPerSet * int(itemSet)
             while lineIter <= self.linesPerSet * int(itemSet) + self.linesPerSet - 1:
-                if self.cacheStruct[lineIter]['tag'] == curTag and self.cacheStruct[lineIter]['set'] == curSet:
+                if self.cacheStruct[lineIter]['tag'] == curTag:
                     itemFound = True
                     foundIndex = lineIter
                     break
@@ -58,10 +58,10 @@ class SetAssociativeCache(Cache):
                 emptyFound = False
                 lineIter = self.linesPerSet * int(itemSet)
                 while lineIter <= self.linesPerSet * int(itemSet) + self.linesPerSet - 1:
-                    if self.cacheStruct[lineIter]['tag'] == '' and self.cacheStruct[lineIter]['set'] == curSet:
+                    if self.cacheStruct[lineIter]['tag'] == '':
                         emptyFound = True
                         self.cacheStruct[lineIter] = {
-                            'set': curSet,
+                            'set': int(itemSet),
                             'tag': curTag,
                             'offset': curOffset,
                             'lru_counter': self.lruCounter,
@@ -85,12 +85,12 @@ class SetAssociativeCache(Cache):
                     replaceIndex = lineIter
                     oldestCounter = self.cacheStruct[replaceIndex][counterStr]
                     while lineIter <= self.linesPerSet * int(itemSet) + self.linesPerSet - 1:
-                        if self.cacheStruct[lineIter][counterStr] < oldestCounter and self.cacheStruct[lineIter]['set'] == curSet:
+                        if self.cacheStruct[lineIter][counterStr] < oldestCounter:
                             replaceIndex = lineIter
                             oldestCounter = self.cacheStruct[lineIter][counterStr]
                         lineIter += 1
                     self.cacheStruct[replaceIndex] = {
-                        'set': curSet,
+                        'set': int(itemSet),
                         'tag': curTag,
                         'offset': curOffset,
                         'lru_counter': self.lruCounter,
