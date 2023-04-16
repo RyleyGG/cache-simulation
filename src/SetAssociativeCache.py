@@ -37,8 +37,13 @@ class SetAssociativeCache(Cache):
             curOffset = self.addLeadingZeros(binaryStr[self.tagWidth + self.setWidth:])
             
             # in set associative caches, we can get the relevant indices by linesPerSet * curSet
-            # range is  [linesPerSet * curSet, (linesPerSet * curSet) + linesPerSet]
-            itemSet = list(self.hexBinConvMap.values()).index(curSet)
+            # range is  [linesPerSet * curSet, (linesPerSet * curSet) + linesPerSet
+            itemSet = 0
+            if curSet in list(self.hexBinConvMap.values()):
+                itemSet = list(self.hexBinConvMap.values()).index(curSet)
+            else:
+                itemSet = self.binaryToHex(curSet)
+
             foundIndex = None
             itemFound = False
             lineIter = self.linesPerSet * int(itemSet)
@@ -116,5 +121,5 @@ class SetAssociativeCache(Cache):
             }
             lineIter += 1
         self.offsetWidth = int(math.log2(self.lineBlockSize))
-        self.setWidth = int(math.log2(self.linesPerSet)) + 1
+        self.setWidth = int(math.log2(self.lineNum / self.linesPerSet))
         self.tagWidth = 32 - self.offsetWidth - self.setWidth
