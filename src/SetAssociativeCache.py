@@ -41,13 +41,13 @@ class SetAssociativeCache(Cache):
             itemSet = list(self.hexBinConvMap.values()).index(curSet)
             foundIndex = None
             itemFound = False
-            setIter = self.linesPerSet * int(itemSet)
-            while setIter <= self.linesPerSet * int(itemSet) + self.linesPerSet - 1:
-                if self.cacheStruct[setIter]['tag'] == curTag:
+            lineIter = self.linesPerSet * int(itemSet)
+            while lineIter <= self.linesPerSet * int(itemSet) + self.linesPerSet - 1:
+                if self.cacheStruct[lineIter]['tag'] == curTag and self.cacheStruct[lineIter]['set'] == curSet:
                     itemFound = True
-                    foundIndex = setIter
+                    foundIndex = lineIter
                     break
-                setIter += 1
+                lineIter += 1
 
             if itemFound:
                 self.hits += 1
@@ -56,11 +56,11 @@ class SetAssociativeCache(Cache):
             else:
                 self.misses += 1
                 emptyFound = False
-                setIter = self.linesPerSet * int(itemSet)
-                while setIter <= self.linesPerSet * int(itemSet) + self.linesPerSet - 1:
-                    if self.cacheStruct[setIter]['tag'] == '':
+                lineIter = self.linesPerSet * int(itemSet)
+                while lineIter <= self.linesPerSet * int(itemSet) + self.linesPerSet - 1:
+                    if self.cacheStruct[lineIter]['tag'] == '' and self.cacheStruct[lineIter]['set'] == curSet:
                         emptyFound = True
-                        self.cacheStruct[setIter] = {
+                        self.cacheStruct[lineIter] = {
                             'set': curSet,
                             'tag': curTag,
                             'offset': curOffset,
@@ -70,7 +70,7 @@ class SetAssociativeCache(Cache):
                         self.lruCounter += 1
                         self.fifoCounter += 1
                         break
-                    setIter += 1
+                    lineIter += 1
 
                 if not emptyFound:
                     counterStr = ''
@@ -81,14 +81,14 @@ class SetAssociativeCache(Cache):
                     else:
                         print('No replacement strategy set. Exiting...')
                         exit(1)
-                    setIter = self.linesPerSet * int(itemSet)
-                    replaceIndex = setIter
+                    lineIter = self.linesPerSet * int(itemSet)
+                    replaceIndex = lineIter
                     oldestCounter = self.cacheStruct[replaceIndex][counterStr]
-                    while setIter <= self.linesPerSet * int(itemSet) + self.linesPerSet - 1:
-                        if self.cacheStruct[setIter][counterStr] < oldestCounter:
-                            replaceIndex = setIter
-                            oldestCounter = self.cacheStruct[setIter][counterStr]
-                        setIter += 1
+                    while lineIter <= self.linesPerSet * int(itemSet) + self.linesPerSet - 1:
+                        if self.cacheStruct[lineIter][counterStr] < oldestCounter and self.cacheStruct[lineIter]['set'] == curSet:
+                            replaceIndex = lineIter
+                            oldestCounter = self.cacheStruct[lineIter][counterStr]
+                        lineIter += 1
                     self.cacheStruct[replaceIndex] = {
                         'set': curSet,
                         'tag': curTag,
