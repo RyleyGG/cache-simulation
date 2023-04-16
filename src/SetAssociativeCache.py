@@ -1,5 +1,4 @@
 from Cache import Cache
-import pandas
 
 class SetAssociativeCache(Cache):
     replacementPolicy = 0
@@ -23,3 +22,21 @@ class SetAssociativeCache(Cache):
         while replacementInput not in ['1', '2']:
             replacementInput = input(f'"{replacementInput}" is not a valid choice. Enter again: ')
         self.replacementPolicy = replacementMap[replacementInput]
+    
+    def simulate(self, addrs):
+        pass
+
+    def initStruct(self):
+        # Set-associative cache has Tag / Line / Offset
+        setNum = 0
+        lineIter = 0
+        for i in range(0, self.lineNum):
+            if lineIter == self.linesPerSet:
+                setNum += 1
+                lineIter = 0
+            self.cacheStruct[i] = {
+                'set': setNum,  # in set-associative caches the set number is dependent on other size factors
+                'tag': '',
+                'offset': ''
+            }
+            lineIter += 1

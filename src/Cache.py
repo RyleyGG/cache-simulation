@@ -6,6 +6,31 @@ class Cache:
     lineBlockSize = 0
     linesPerSet = 0
     lineNum = 0
+    hits = 0
+    misses = 0
+    tagWidth = 0
+    lineWidth = 0
+    offsetWidth = 0
+    setWidth = 0
+    cacheStruct = {}
+    hexBinConvMap = { # Very inelegant solution btu since we don't need to do any arithmetic, only matching,  it'll work
+        '0': '0000',
+        '1': '0001',
+        '2': '0010',
+        '3': '0011',
+        '4': '0100',
+        '5': '0101',
+        '6': '0110',
+        '7': '0111',
+        '8': '1000',
+        '9': '1001',
+        'a': '1010',
+        'b': '1011',
+        'c': '1100',
+        'd': '1101',
+        'e': '1110',
+        'f': '1111'
+    }
 
     def __init__(self):
         self.totalSize = input('Enter total number of bytes to be stored in the cache. Use a power of 2: ')
@@ -43,3 +68,15 @@ class Cache:
         except ValueError:
             pass
         return False
+
+    def addLeadingZeros(self, inputStr):
+        newStr = inputStr
+        while len(newStr) % 4 != 0:
+            newStr = '0' + newStr
+        return newStr
+
+    def simulate(self, addrs):
+        pass
+
+    def initStruct(self):
+        pass
