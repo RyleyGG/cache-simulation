@@ -1,7 +1,10 @@
 from Cache import Cache
+import math
 
 class SetAssociativeCache(Cache):
-    replacementPolicy = 0
+    replacementPolicy = ''
+    lruCounter = 1
+    fifoCounter = 1
 
     def __init__(self, cache):
         self.totalSize = cache.totalSize
@@ -24,10 +27,80 @@ class SetAssociativeCache(Cache):
         self.replacementPolicy = replacementMap[replacementInput]
     
     def simulate(self, addrs):
-        pass
+        for addr in addrs:
+            binaryStr = ''
+            for char in addr:
+                binaryStr += self.hexBinConvMap[char]
+            
+            curTag = self.addLeadingZeros(binaryStr[0:self.tagWidth])
+            curSet = self.addLeadingZeros(binaryStr[self.tagWidth:self.tagWidth + self.setWidth])
+            curOffset = self.addLeadingZeros(binaryStr[self.tagWidth + self.setWidth:])
+            
+            # in set associative caches, we can get the relevant indices by linesPerSet * curSet
+            # range is  [linesPerSet * curSet, (linesPerSet * curSet) + linesPerSet]
+            itemSet = list(self.hexBinConvMap.values()).index(curSet)
+            foundIndex = None
+            itemFound = False
+            setIter = self.linesPerSet * int(itemSet)
+            while setIter <= self.linesPerSet * int(itemSet) + self.linesPerSet - 1:
+                if self.cacheStruct[setIter]['tag'] == curTag:
+                    itemFound = True
+                    foundIndex = setIter
+                    break
+                setIter += 1
+
+            if itemFound:
+                self.hits += 1
+                self.cacheStruct[foundIndex]['lru_counter'] = self.lruCounter
+                self.lruCounter += 1
+            else:
+                self.misses += 1
+                emptyFound = False
+                setIter = self.linesPerSet * int(itemSet)
+                while setIter <= self.linesPerSet * int(itemSet) + self.linesPerSet - 1:
+                    if self.cacheStruct[setIter]['tag'] == '':
+                        emptyFound = True
+                        self.cacheStruct[setIter] = {
+                            'set': curSet,
+                            'tag': curTag,
+                            'offset': curOffset,
+                            'lru_counter': self.lruCounter,
+                            'fifo_counter': self.fifoCounter
+                        }
+                        self.lruCounter += 1
+                        self.fifoCounter += 1
+                        break
+                    setIter += 1
+
+                if not emptyFound:
+                    counterStr = ''
+                    if self.replacementPolicy == 'LRU':
+                        counterStr = 'lru_counter'
+                    elif self.replacementPolicy == 'FIFO':
+                        counterStr = 'fifo_counter'
+                    else:
+                        print('No replacement strategy set. Exiting...')
+                        exit(1)
+                    setIter = self.linesPerSet * int(itemSet)
+                    replaceIndex = setIter
+                    oldestCounter = self.cacheStruct[replaceIndex][counterStr]
+                    while setIter <= self.linesPerSet * int(itemSet) + self.linesPerSet - 1:
+                        if self.cacheStruct[setIter][counterStr] < oldestCounter:
+                            replaceIndex = setIter
+                            oldestCounter = self.cacheStruct[setIter][counterStr]
+                        setIter += 1
+                    self.cacheStruct[replaceIndex] = {
+                        'set': curSet,
+                        'tag': curTag,
+                        'offset': curOffset,
+                        'lru_counter': self.lruCounter,
+                        'fifo_counter': self.fifoCounter
+                    }
+                    self.lruCounter += 1
+                    self.fifoCounter += 1
 
     def initStruct(self):
-        # Set-associative cache has Tag / Line / Offset
+        # Set-associative cache has Tag / Set / Offset
         setNum = 0
         lineIter = 0
         for i in range(0, self.lineNum):
@@ -37,6 +110,11 @@ class SetAssociativeCache(Cache):
             self.cacheStruct[i] = {
                 'set': setNum,  # in set-associative caches the set number is dependent on other size factors
                 'tag': '',
-                'offset': ''
+                'offset': '',
+                'lru_counter': 0,
+                'fifo_counter': 0
             }
             lineIter += 1
+        self.offsetWidth = int(math.log2(self.lineBlockSize))
+        self.setWidth = int(math.log2(self.linesPerSet)) + 1
+        self.tagWidth = 32 - self.offsetWidth - self.setWidth
